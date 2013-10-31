@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!--This page is adapted from Mike Bostock and Scott Murray's d3.js examples-->
+<meta charset="utf-8">
+<style>
+.link {
+  stroke: #ccc;
+}
+
+.node text {
+  pointer-events: none;
+  font: 10px sans-serif;
+}
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var width = 960;
+var height = 600;
+var colors = d3.scale.category10();
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var force = d3.layout.force()
+    .gravity(.25)
+    .distance(50)
+    .charge(-300)
+    .size([width, height]);
+
+svg.append("text").attr("id", "tooltip");
+
+d3.json("graph.json", function(error, json) {
+  force
+      .nodes(json.nodes)
+      .links(json.links)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(json.links)
+      .enter().append("line")
+      .attr("class", "link");
+
+  var node = svg.selectAll(".node")
+      .data(json.nodes)
+      .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag);
+  node.append("circle")
+      .attr("x", -8)
+      .attr("y", -8)
+      .attr("r", function(d){
+              return 1 + Math.sqrt(Math.pow(1.6, d.degree)/Math.PI) ; 
+          }
+      )
+      .style("fill", function(d, i){
+              return colors(i);
+          }
+     )
+     .on("mouseover", function(d){
+        var xPosition = d3.event.clientX;
+        var yPosition = d3.event.clientY;
+
+        d3.select("#tooltip").remove();
+        svg.append("text")
+    			   .attr("id", "tooltip")
+	    		   .attr("x", xPosition)
+                   .attr("y", yPosition)
+			       .attr("text-anchor", "middle")
+			       .attr("font-family", "sans-serif")
+			       .attr("font-size", "11px")
+			       .attr("font-weight", "bold")
+			       .attr("fill", "black")
+			       .text(d.name + "(@" + d.scr_name + "), followed by " +
+                     d.degree + " users");
+
+        }
+     )
+     .on("mouseout", function(){
+         d3.select("#tooltip")
+         .transition()
+         .delay(1500)
+         .text("");
+        }
+     )
+        ;
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+});
+
+</script>
+

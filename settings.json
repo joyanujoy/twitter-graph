@@ -1,0 +1,9 @@
+{        
+    "app_name": "MyApp",
+    "consumer_key": "ii23773DgpKS7x1dyFXVg",
+    "consumer_secret": "zEI4884jniYjByVnPjr6RqPffs2U",
+    "auth_url": "https://api.twitter.com/oauth2/token",
+    "friends_url": "https://api.twitter.com/1.1/friends/ids.json",
+    "limit_url": "https://api.twitter.com/1.1/application/rate_limit_status.json",
+    "user_lookup_url" : "https://api.twitter.com/1.1/users/lookup.json"
+}
