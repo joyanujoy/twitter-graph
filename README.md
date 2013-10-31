@@ -28,7 +28,7 @@ Installation
 
 Due to API restrictions it can make only ~15 API calls per 15 minutes to retrieve friend/ids. It will need a few hours to run against a popular twitter account. e.g 1.5 hours to extract my network from a friend list of 100.
 
-* Output is a json file graph.json in the below format. See the sample file in repository
+* Output is a json file graph.json in the below format. See the sample file in repository. Degree is the indegree of a graph node .ie the number of followers within the network.
  * 
    ` {`  
     `    "nodes" : [  `
