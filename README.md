@@ -3,7 +3,7 @@ twitter-graph
 
 A tool written in python to extract a twitter user's social graph.
 
-twitter-graph allows you to build a social graph by extracting a twitter user's friend(following) list and friends' friend list. A user followed by two or more users in the network is included in the output. Output file is in json format for visualisation using d3.js.
+twitter-graph allows you to build a social graph by extracting a twitter user's friend(following) list and friends' friend list. A user followed by more than 5 users in the network is included in the output. Output file is in json format for visualisation using d3.js.
 
 The tool has a self-limiting feature to limit the number of API calls per 15 minute to prevent your app from being black listed. 
 
