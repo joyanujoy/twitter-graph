@@ -12,9 +12,7 @@ Installation
 ------------
 
 
-* Copy all files to a directory:  
-
- * `$ git clone https://github.com/joyanujoy/twitter-graph.git`  
+* Copy all files to a directory by cloing this repo.  
 
 * Obtain an API key by registering a twitter app at dev.twitter.com. Update settings.json file with your app name, consumer key and consumer secret.
 
