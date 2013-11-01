@@ -7,11 +7,7 @@ twitter-graph allows you to build a social graph by extracting a twitter user's 
 
 The tool has a self-limiting feature to limit the number of API calls per 15 minute to prevent your app from being black listed. 
 
-[An example output visusalised in d3.js](https://raw.github.com/joyanujoy/twitter-graph/master/example/index.html "Example Output in d3.js")    
 ![Output visusalised in d3.js](https://raw.github.com/joyanujoy/twitter-graph/master/graph.png  "Output visusalised in d3.js")
-
-
-<a href="https://raw.github.com/joyanujoy/twitter-graph/master/graph.png"></a> 
 
 Installation
 ------------
