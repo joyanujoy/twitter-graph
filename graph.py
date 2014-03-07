@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-graph.py
+graph.py - written during my early python days, so code not 100% pythonic
 --------
 
 graph.py is a tool for extracting a twitter user's friends ie 'following' list
@@ -79,22 +79,28 @@ def self_limit(twitter, entity, n):
     a second more to overcome the limit.
     twitter :   twitter object
     entity  :   twitter resource entity; 'friends/ids' or 'users/lookup'
-    n       :   self limit threshold
+    n       :   self limit threshold, e.g 3 (3 calls remaining)
+
 
     Twitter limit API returns an epoch time value when the current limit
     window will be reset; sleep for reset time + 1 second.
     """
     snooze = None
-    limits = twitter.get_limits()
 
-    if entity == 'friends/ids':
-        if limits['resources']['friends']['/friends/ids']['remaining'] < n:
-            snooze = abs(limits['resources']['friends']['/friends/ids']
-                         ['reset'] - time()) + 1
-    elif entity == 'users/lookup':
-        if limits['resources']['users']['/users/lookup']['remaining'] < n:
-            snooze = abs(limits['resources']['users']['/users/lookup']
-                         ['reset'] - time()) + 1
+    try:
+
+        limits = twitter.get_limits()
+
+        if entity == 'friends/ids':
+            if limits['resources']['friends']['/friends/ids']['remaining'] < n:
+                snooze = abs(limits['resources']['friends']['/friends/ids']
+                             ['reset'] - time()) + 1
+        elif entity == 'users/lookup':
+            if limits['resources']['users']['/users/lookup']['remaining'] < n:
+                snooze = abs(limits['resources']['users']['/users/lookup']
+                             ['reset'] - time()) + 1
+    except:
+        raise
 
     if(snooze):
         logging.info(("Nearing limit, sleeping till %s") %
@@ -120,17 +126,29 @@ def main(filename, screen_name):
 
     # Get main screen names's user id
     self_limit(twitter, 'users/lookup', 3)
-    uid = call_api(twitter.user_lookup(screen_name=screen_name),
-                   3)[0]['id_str']
+    try:
+        uid = call_api(twitter.user_lookup(screen_name=screen_name),
+                       3)[0]['id_str']
+    except:
+        logging.debug("Error getting twitter userid: " + screen_name)
+        raise
 
     # Get friends uids and build the first graph node
     self_limit(twitter, 'friends/ids', 3)
-    graph[uid] = call_api(twitter.get_friends(uid), 3)
+    try:
+        graph[uid] = call_api(twitter.get_friends(uid), 3)
+    except:
+        logging.debug("Error getting friends list")
+        raise
 
     # Get friends' friends and add to nodes; graph[friend] = [their friends]
     for friend in graph[uid]:
         self_limit(twitter, 'friends/ids', 3)
-        graph[friend] = call_api(twitter.get_friends(friend), 3)
+        try:
+            graph[friend] = call_api(twitter.get_friends(friend), 3)
+        except:
+            logging.debug("Error getting friends' friends!")
+            raise
         # No point in hitting twitter too fast
         sleep(10)
 
@@ -166,7 +184,13 @@ def main(filename, screen_name):
         n += 1
         query_str += user + ","
         if (n % 100 == 0) or n == len(node_list):
-            r = call_api(twitter.user_lookup(id=query_str), 3)
+
+            try:
+                r = call_api(twitter.user_lookup(id=query_str), 3)
+            except:
+                logging.debug("Error getting details for: " + user)
+                raise
+
             for rec in r:
                 # user_details[user_id] = [name, screen_name].
                 user_details[rec['id_str']] = [rec.get('name'),
