@@ -61,9 +61,11 @@ class Twitter:
             if r.json()['token_type'] == 'bearer':
                 self.access_token = r.json()['access_token']
             else:
-                raise Exception("Invalid response from access token api")
-        except Exception:
+                raise Exception("Invalid response from access token api,"
+                                "token_type: 'bearer' not returned")
+        except:
             logging.debug("Error posting access token request")
+            raise
 
     def get_friends(self, id):
         """
@@ -86,11 +88,9 @@ class Twitter:
             r = requests.get(self.friends_url, params=payload, headers=headers)
             if r.status_code == requests.codes.ok:
                 return r.json().get('ids')
-            else:
-                return None
-        except Exception:
+        except:
             logging.debug("Error getting friends/ids")
-            return None
+            raise
 
     def get_limits(self):
         headers = {
@@ -106,11 +106,9 @@ class Twitter:
             r = requests.get(self.limit_url, params=payload, headers=headers)
             if r.status_code == requests.codes.ok:
                 return r.json()
-            else:
-                return None
-        except Exception:
+        except:
             logging.debug("Error getting resource limits")
-            return None
+            raise
 
     def user_lookup(self, screen_name="", id=""):
         headers = {
@@ -129,8 +127,6 @@ class Twitter:
                              headers=headers)
             if r.status_code == requests.codes.ok:
                 return r.json()
-            else:
-                return None
-        except Exception:
+        except:
             logging.debug("Error getting user details")
-            return None
+            raise
