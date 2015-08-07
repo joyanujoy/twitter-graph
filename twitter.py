@@ -27,7 +27,7 @@ class Twitter:
 
     def __init__(self, app_name="", consumer_key="", consumer_secret="",
                  auth_url="", friends_url="", limit_url="",
-                 user_lookup_url=""):
+                 user_lookup_url="", access_token=""):
         self.app_name = app_name
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
@@ -36,6 +36,7 @@ class Twitter:
         self.limit_url = limit_url
         self.user_lookup_url = user_lookup_url
         self.CONTENT_TYPE = 'application/x-www-form-urlencoded;charset=UTF-8'
+        self.access_token = access_token
 
     def __repr__(self):
         return "Twitter(app_name=%s, consumer_key=%s, consumer_secret=%s, "\
@@ -45,7 +46,9 @@ class Twitter:
                self.access_token)
 
     def get_access_token(self):
-        """ Returns the bearer token for api requests """
+        """ gets and sets the bearer token for api requests
+
+        """
 
         headers = {
             'User-Agent': self.app_name,
@@ -58,11 +61,9 @@ class Twitter:
 
         try:
             r = requests.post(self.auth_url, payload, headers=headers)
-            if r.json()['token_type'] == 'bearer':
-                self.access_token = r.json()['access_token']
-            else:
-                raise Exception("Invalid response from access token api,"
-                                "token_type: 'bearer' not returned")
+            self.access_token = r.json().get('access_token')
+            if not self.access_token:
+                raise RuntimeError("API failed to return access token")
         except:
             logging.debug("Error posting access token request")
             raise
@@ -73,6 +74,16 @@ class Twitter:
         visualisation. If more than 5000 records need to be
         retrieved this function needs to be modified to use twitter's
         cursor navigation method
+
+        Parameters
+        ----------
+        id: Twitter user id
+
+
+        Returns
+        -------
+        List of 5000 friend ids as a list
+
         """
         headers = {
             'User-Agent': self.app_name,
@@ -93,6 +104,10 @@ class Twitter:
             raise
 
     def get_limits(self):
+        """
+        Get Twitter usage limits especially remaining calls and seconds
+        remaining in the current window.
+        """
         headers = {
             'User-Agent': self.app_name,
             'Authorization': 'Bearer ' + self.access_token,
@@ -110,7 +125,19 @@ class Twitter:
             logging.debug("Error getting resource limits")
             raise
 
-    def user_lookup(self, screen_name="", id=""):
+    def user_lookup(self, screen_name=None, id=None):
+        """
+        Parameters
+        ----------
+        screen_name: twitter screen name without @
+        id: twitter id
+
+        Provide one of the params
+
+        Returns
+        -------
+        Twitter user lookup results as a dict
+        """
         headers = {
             'User-Agent': self.app_name,
             'Authorization': 'Bearer ' + self.access_token,
