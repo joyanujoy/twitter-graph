@@ -99,7 +99,7 @@ def self_limit(twitter, entity, n):
             if limits['resources']['users']['/users/lookup']['remaining'] < n:
                 snooze = abs(limits['resources']['users']['/users/lookup']
                              ['reset'] - time()) + 1
-    except:
+    except Exception:
         raise
 
     if(snooze):
@@ -114,7 +114,6 @@ def main(filename, screen_name):
     screen_name : screen name of a twitter user
     """
 
-    # Get application settings, api url etc
     with open(filename, 'r') as f:
         settings = json.load(f)
 
@@ -124,20 +123,18 @@ def main(filename, screen_name):
     # Graph structure { node_a: [connected_node_1, connected_node_2,..]}
     graph = {}
 
-    # Get main screen names's user id
     self_limit(twitter, 'users/lookup', 3)
     try:
         uid = call_api(twitter.user_lookup(screen_name=screen_name),
                        3)[0]['id_str']
-    except:
+    except Exception:
         logging.debug("Error getting twitter userid: " + screen_name)
         raise
 
-    # Get friends uids and build the first graph node
     self_limit(twitter, 'friends/ids', 3)
     try:
         graph[uid] = call_api(twitter.get_friends(uid), 3)
-    except:
+    except Exception:
         logging.debug("Error getting friends list")
         raise
 
@@ -146,7 +143,7 @@ def main(filename, screen_name):
         self_limit(twitter, 'friends/ids', 3)
         try:
             graph[friend] = call_api(twitter.get_friends(friend), 3)
-        except:
+        except Exception:
             logging.debug("Error getting friends' friends!")
             raise
         # No point in hitting twitter too fast
@@ -157,7 +154,6 @@ def main(filename, screen_name):
     # only those users with at least 2 followers within the network.
     freq = {}
     freq[uid] = 0  # because main user may not appear in the below list
-    # flatten the list containing lists within
     for node in [x for y in graph.values() if y is not None for x in y]:
         if node in freq:
             freq[node] += 1
@@ -180,6 +176,7 @@ def main(filename, screen_name):
     n = 0
     query_str = ''
     user_details = {}
+
     for user in node_list:
         n += 1
         query_str += user + ","
@@ -187,7 +184,7 @@ def main(filename, screen_name):
 
             try:
                 r = call_api(twitter.user_lookup(id=query_str), 3)
-            except:
+            except Exception:
                 logging.debug("Error getting details for: " + user)
                 raise
 
